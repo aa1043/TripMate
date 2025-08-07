@@ -1,49 +1,53 @@
+# 🚗🚖 UBER Clone - Backend API
 
-# 🚗 UBER Clone - User API
+This backend API powers the UBER clone application, supporting **User** and **Driver** operations such as registration, login, profile retrieval, and logout with JWT authentication and token blacklisting.
 
-This API handles user registration, login, profile access, and logout for the UBER clone backend. Users can register, authenticate using JWT, access their profile, and log out (with token blacklisting).
+---
+
+## 📍 Endpoints Overview
+
+### **User Endpoints**
+
+- **POST** `/users/register` → Register a new user
+- **POST** `/users/login` → Login user and return JWT token (also sets a cookie)
+- **GET** `/users/profile` → Get authenticated user profile
+- **GET** `/users/logout` → Logout user and blacklist JWT
+
+### **Driver Endpoints**
+
+- **POST** `/drivers/register` → Register a new driver
+- **POST** `/drivers/login` → Login driver and return JWT token (also sets a cookie)
+- **GET** `/drivers/profile` → Get authenticated driver profile
+- **GET** `/drivers/logout` → Logout driver and blacklist JWT
 
 ---
 
-## 📍 Endpoints
-
-### 🔹 POST `/users/register`
-Registers a new user and returns a JWT token.
-
-### 🔹 POST `/users/login`
-Authenticates an existing user and returns a JWT token (also sets a cookie).
-
-### 🔹 GET `/users/profile`
-Returns authenticated user’s profile info (requires token or cookie).
-
-### 🔹 GET `/users/logout`
-Clears authentication cookie and blacklists the token (requires token or cookie).
-
----
+# 👤 USER API
 
 ## 📄 Description
 
 ### ✅ `/users/register`
-Creates a new user account:
+
 - Validates name, email, password
 - Hashes password securely with bcrypt
 - Stores user in database
-- Returns a JWT token
+- Returns JWT token
 
 ### ✅ `/users/login`
-Logs in an existing user:
+
 - Validates email and password
 - Compares hashed password
-- Returns a JWT token and sets it as an HTTP-only cookie
+- Returns JWT token and sets as HTTP-only cookie
 
 ### ✅ `/users/profile`
-Returns the profile data of the authenticated user:
-- Requires valid JWT in cookie or `Authorization` header
+
+- Returns user profile data
+- Requires JWT in cookie or Authorization header
 
 ### ✅ `/users/logout`
-Logs the user out:
+
 - Clears JWT cookie
-- Blacklists the token to prevent reuse
+- Blacklists token
 
 ---
 
@@ -53,10 +57,7 @@ Logs the user out:
 
 ```json
 {
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
+  "fullname": { "firstname": "John", "lastname": "Doe" },
   "email": "john.doe@example.com",
   "password": "securePassword123"
 }
@@ -75,78 +76,34 @@ Logs the user out:
 
 ## 🔐 Field Requirements
 
-### For `/users/register`
-
-| Field                | Type   | Required | Description                   |
-|----------------------|--------|----------|-------------------------------|
-| fullname.firstname   | String | ✅ Yes   | User's first name             |
-| fullname.lastname    | String | ✅ Yes   | User's last name              |
-| email                | String | ✅ Yes   | Must be a valid email address |
-| password             | String | ✅ Yes   | Minimum 6 characters          |
-
-### For `/users/login`
-
-| Field    | Type   | Required | Description                   |
-|----------|--------|----------|-------------------------------|
-| email    | String | ✅ Yes   | Must be a valid email address |
-| password | String | ✅ Yes   | User's password               |
+| Field              | Type   | Required | Description          |
+| ------------------ | ------ | -------- | -------------------- |
+| fullname.firstname | String | ✅ Yes    | First name           |
+| fullname.lastname  | String | ✅ Yes    | Last name            |
+| email              | String | ✅ Yes    | Valid email          |
+| password           | String | ✅ Yes    | Minimum 6 characters |
 
 ---
 
 ## ✅ Success Responses
 
-### `/users/register` → `201 Created`
+``** → 201 Created**
 
 ```json
 {
   "message": "User registered successfully",
-  "user": {
-    "id": "64f0c4b3e5d13a7b37e33a09",
-    "email": "john.doe@example.com",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    }
-  },
+  "user": { "id": "64f0...", "email": "john.doe@example.com", "fullname": { "firstname": "John", "lastname": "Doe" } },
   "token": "JWT_TOKEN_HERE"
 }
 ```
 
-### `/users/login` → `200 OK`
+``** → 200 OK**
 
 ```json
 {
   "message": "Login successful",
-  "user": {
-    "id": "64f0c4b3e5d13a7b37e33a09",
-    "email": "john.doe@example.com",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    }
-  },
+  "user": { "id": "64f0...", "email": "john.doe@example.com", "fullname": { "firstname": "John", "lastname": "Doe" } },
   "token": "JWT_TOKEN_HERE"
-}
-```
-
-### `/users/profile` → `200 OK`
-
-```json
-{
-  "_id": "64f0c4b3e5d13a7b37e33a09",
-  "email": "john.doe@example.com",
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  }
-}
-```
-
-### `/users/logout` → `200 OK`
-
-```json
-{
-  "message": "User logged out successfully"
 }
 ```
 
@@ -154,99 +111,189 @@ Logs the user out:
 
 ## ❌ Error Responses
 
-### `400 Bad Request`
-
-Input validation failed:
+- **400 Bad Request**
 
 ```json
 {
-  "errors": [
-    {
-      "msg": "Email is required",
-      "param": "email",
-      "location": "body"
-    }
-  ]
+  "errors": [{ "msg": "Email is required", "param": "email", "location": "body" }]
 }
 ```
 
-### `401 Unauthorized`
-
-Invalid login credentials, no token, blacklisted token, or user not found:
+- **401 Unauthorized**
 
 ```json
 { "error": "Invalid credentials" }
 ```
+
 or
-```json
-{ "error": "User not found, Please Register first" }
-```
-or
-```json
-{ "error": "Unauthorized access" }
-```
-or
+
 ```json
 { "error": "Token is blacklisted" }
-```
-
-### `500 Internal Server Error`
-
-Server or database error:
-
-```json
-{ "error": "User already exists" }
 ```
 
 ---
 
 ## 📎 Example cURL Requests
 
-### Register
-
 ```bash
-curl -X POST http://localhost:4000/users/register \
--H "Content-Type: application/json" \
--d '{
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
-  "email": "john.doe@example.com",
-  "password": "securePassword123"
-}'
-```
+# Register
+curl -X POST http://localhost:4000/users/register -H "Content-Type: application/json" -d '{"fullname":{"firstname":"John","lastname":"Doe"},"email":"john.doe@example.com","password":"securePassword123"}'
 
-### Login
+# Login
+curl -X POST http://localhost:4000/users/login -H "Content-Type: application/json" -d '{"email":"john.doe@example.com","password":"securePassword123"}'
 
-```bash
-curl -X POST http://localhost:4000/users/login \
--H "Content-Type: application/json" \
--d '{
-  "email": "john.doe@example.com",
-  "password": "securePassword123"
-}'
-```
+# Profile
+curl -X GET http://localhost:4000/users/profile -H "Authorization: Bearer JWT_TOKEN_HERE"
 
-### Profile (Requires Token in Cookie or Header)
-
-```bash
-curl -X GET http://localhost:4000/users/profile \
--H "Authorization: Bearer JWT_TOKEN_HERE"
-```
-
-### Logout
-
-```bash
-curl -X GET http://localhost:4000/users/logout \
--H "Authorization: Bearer JWT_TOKEN_HERE"
+# Logout
+curl -X GET http://localhost:4000/users/logout -H "Authorization: Bearer JWT_TOKEN_HERE"
 ```
 
 ---
 
-## 🛠 Developer Notes
+# 🚖 DRIVER API
 
-- Ensure `.env` contains a valid `JWT_SECRET`
-- Passwords are hashed using `bcrypt` before being stored
-- JWTs expire after 1 hour by default
-- Blacklisted tokens are stored in `blacklistToken` collection
+## 📄 Description
+
+### ✅ `/drivers/register`
+
+- Validates fullname, email, password, and vehicle details
+- Hashes password securely with bcrypt
+- Stores driver in database
+
+### ✅ `/drivers/login`
+
+- Validates email and password
+- Compares hashed password
+- Returns JWT token and sets as HTTP-only cookie (`driver_token` recommended)
+
+### ✅ `/drivers/profile`
+
+- Returns driver profile
+- Requires JWT in cookie or Authorization header
+
+### ✅ `/drivers/logout`
+
+- Clears driver token cookie
+- Blacklists token
+
+---
+
+## 📥 Request Bodies
+
+### `/drivers/register`
+
+```json
+{
+  "fullname": { "firstname": "John", "lastname": "Doe" },
+  "email": "driver.john@example.com",
+  "password": "driverSecure123",
+  "vehicle": {
+    "color": "red",
+    "plate": "WB12AB3456",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+### `/drivers/login`
+
+```json
+{
+  "email": "driver.john@example.com",
+  "password": "driverSecure123"
+}
+```
+
+---
+
+## 🔐 Field Requirements
+
+| Field               | Type   | Required | Description          |
+| ------------------- | ------ | -------- | -------------------- |
+| fullname.firstname  | String | ✅ Yes    | Driver first name    |
+| fullname.lastname   | String | ✅ Yes    | Driver last name     |
+| email               | String | ✅ Yes    | Valid email          |
+| password            | String | ✅ Yes    | Minimum 6 characters |
+| vehicle.color       | String | ✅ Yes    | Vehicle color        |
+| vehicle.plate       | String | ✅ Yes    | Unique plate number  |
+| vehicle.capacity    | Number | ✅ Yes    | Minimum 1 seat       |
+| vehicle.vehicleType | String | ✅ Yes    | car, bike, or auto   |
+
+---
+
+## ✅ Success Responses
+
+``** → 201 Created**
+
+```json
+{
+  "message": "Driver registered successfully",
+  "driver": { "id": "64f0...", "email": "driver.john@example.com", "fullname": { "firstname": "John", "lastname": "Doe" }, "vehicle": { "color": "red", "plate": "WB12AB3456", "capacity": 4, "vehicleType": "car" } },
+  "token": "JWT_TOKEN_HERE"
+}
+```
+
+``** → 200 OK**
+
+```json
+{
+  "message": "Login successful",
+  "driver": { "id": "64f0...", "email": "driver.john@example.com", "fullname": { "firstname": "John", "lastname": "Doe" }, "vehicle": { "color": "red", "plate": "WB12AB3456", "capacity": 4, "vehicleType": "car" } },
+  "token": "JWT_TOKEN_HERE"
+}
+```
+
+---
+
+## ❌ Error Responses
+
+- **400 Bad Request**
+
+```json
+{
+  "errors": [{ "msg": "Vehicle plate is required", "param": "vehicle.plate", "location": "body" }]
+}
+```
+
+- **401 Unauthorized**
+
+```json
+{ "error": "Invalid credentials" }
+```
+
+or
+
+```json
+{ "error": "Token is blacklisted" }
+```
+
+---
+
+## 📎 Example cURL Requests
+
+```bash
+# Register
+curl -X POST http://localhost:4000/drivers/register -H "Content-Type: application/json" -d '{"fullname":{"firstname":"John","lastname":"Doe"},"email":"driver.john@example.com","password":"driverSecure123","vehicle":{"color":"red","plate":"WB12AB3456","capacity":4,"vehicleType":"car"}}'
+
+# Login
+curl -X POST http://localhost:4000/drivers/login -H "Content-Type: application/json" -d '{"email":"driver.john@example.com","password":"driverSecure123"}'
+
+# Profile
+curl -X GET http://localhost:4000/drivers/profile -H "Authorization: Bearer JWT_TOKEN_HERE"
+
+# Logout
+curl -X GET http://localhost:4000/drivers/logout -H "Authorization: Bearer JWT_TOKEN_HERE"
+```
+
+---
+
+# 🛠 Developer Notes
+
+- Add `JWT_SECRET` in `.env`
+- Passwords hashed using `bcrypt`
+- JWT expiry: Users → 1 hour, Drivers → 24 hours
+- Blacklisted tokens auto-expire in 24 hours
+- Recommended: Use separate cookies for user (`token`) and driver (`driver_token`) to avoid conflicts
+
