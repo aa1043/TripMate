@@ -36,3 +36,39 @@ module.exports.registerUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+module.exports.loginUser = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { email, password } = req.body;
+
+        const user = await userModel.findOne({ email }).select('+password');// +password because password is set to select: false in the schema
+        if (!user) {
+            return res.status(401).json({ error: "User not found,Please Register first" });
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        const token = user.generateAuthToken();
+
+        res.status(200).json({
+            message: "Login successful",
+            user: {
+                id: user._id,
+                email: user.email,
+                fullname: user.fullname
+            },
+            token
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
