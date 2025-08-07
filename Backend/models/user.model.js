@@ -16,7 +16,9 @@ const userSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true,
+        match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
     },
     password: {
         type: String,
@@ -44,6 +46,9 @@ userSchema.statics.hashPassword = async function (password) {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
 };
+
+
+
 
 const userModel = mongoose.model("User", userSchema);
 module.exports = userModel;
