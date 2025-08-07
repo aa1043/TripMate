@@ -7,6 +7,7 @@ This backend API powers the UBER clone application, supporting **User** and **Dr
 ## 📍 Endpoints Overview
 
 ### **User Endpoints**
+not
 
 - **POST** `/users/register` → Register a new user
 - **POST** `/users/login` → Login user and return JWT token (also sets a cookie)
