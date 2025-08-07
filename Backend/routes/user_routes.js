@@ -19,6 +19,6 @@ router.post('/login', [
 router.get('/profile',auth_middleware.authUser, 
     user_controller.getUserProfile)
 
-router.get('/logout', auth_middleware.authUser, 
-    user_controller.logoutUser)
+    router.get('/logout', auth_middleware.authUser, 
+        user_controller.logoutUser)
 module.exports = (router)

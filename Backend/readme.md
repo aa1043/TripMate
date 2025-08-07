@@ -1,7 +1,7 @@
 
 # 🚗 UBER Clone - User API
 
-This API handles user registration and login for the UBER clone backend. Users can register by providing their full name, email, and password. They can log in with valid credentials to receive a JWT token.
+This API handles user registration, login, profile access, and logout for the UBER clone backend. Users can register, authenticate using JWT, access their profile, and log out (with token blacklisting).
 
 ---
 
@@ -11,26 +11,39 @@ This API handles user registration and login for the UBER clone backend. Users c
 Registers a new user and returns a JWT token.
 
 ### 🔹 POST `/users/login`
-Authenticates an existing user and returns a JWT token.
+Authenticates an existing user and returns a JWT token (also sets a cookie).
+
+### 🔹 GET `/users/profile`
+Returns authenticated user’s profile info (requires token or cookie).
+
+### 🔹 GET `/users/logout`
+Clears authentication cookie and blacklists the token (requires token or cookie).
 
 ---
 
 ## 📄 Description
 
 ### ✅ `/users/register`
-
-Creates a new user account by:
-- Validating inputs
-- Hashing the password with bcrypt
-- Storing the user in MongoDB
-- Returning a JWT token
+Creates a new user account:
+- Validates name, email, password
+- Hashes password securely with bcrypt
+- Stores user in database
+- Returns a JWT token
 
 ### ✅ `/users/login`
+Logs in an existing user:
+- Validates email and password
+- Compares hashed password
+- Returns a JWT token and sets it as an HTTP-only cookie
 
-Authenticates a user by:
-- Validating inputs
-- Verifying email and password
-- Returning a JWT token if credentials are correct
+### ✅ `/users/profile`
+Returns the profile data of the authenticated user:
+- Requires valid JWT in cookie or `Authorization` header
+
+### ✅ `/users/logout`
+Logs the user out:
+- Clears JWT cookie
+- Blacklists the token to prevent reuse
 
 ---
 
@@ -116,6 +129,27 @@ Authenticates a user by:
 }
 ```
 
+### `/users/profile` → `200 OK`
+
+```json
+{
+  "_id": "64f0c4b3e5d13a7b37e33a09",
+  "email": "john.doe@example.com",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  }
+}
+```
+
+### `/users/logout` → `200 OK`
+
+```json
+{
+  "message": "User logged out successfully"
+}
+```
+
 ---
 
 ## ❌ Error Responses
@@ -138,18 +172,22 @@ Input validation failed:
 
 ### `401 Unauthorized`
 
-Invalid login credentials or user not found:
+Invalid login credentials, no token, blacklisted token, or user not found:
 
 ```json
-{
-  "error": "Invalid credentials"
-}
+{ "error": "Invalid credentials" }
 ```
 or
 ```json
-{
-  "error": "User not found, Please Register first"
-}
+{ "error": "User not found, Please Register first" }
+```
+or
+```json
+{ "error": "Unauthorized access" }
+```
+or
+```json
+{ "error": "Token is blacklisted" }
 ```
 
 ### `500 Internal Server Error`
@@ -157,9 +195,7 @@ or
 Server or database error:
 
 ```json
-{
-  "error": "User already exists"
-}
+{ "error": "User already exists" }
 ```
 
 ---
@@ -192,10 +228,25 @@ curl -X POST http://localhost:4000/users/login \
 }'
 ```
 
+### Profile (Requires Token in Cookie or Header)
+
+```bash
+curl -X GET http://localhost:4000/users/profile \
+-H "Authorization: Bearer JWT_TOKEN_HERE"
+```
+
+### Logout
+
+```bash
+curl -X GET http://localhost:4000/users/logout \
+-H "Authorization: Bearer JWT_TOKEN_HERE"
+```
+
 ---
 
 ## 🛠 Developer Notes
 
-- Ensure `.env` contains a valid `JWT_SECRET`.
-- Passwords are hashed using `bcrypt` before being stored.
-- JWT tokens expire after 1 hour by default.
+- Ensure `.env` contains a valid `JWT_SECRET`
+- Passwords are hashed using `bcrypt` before being stored
+- JWTs expire after 1 hour by default
+- Blacklisted tokens are stored in `blacklistToken` collection
