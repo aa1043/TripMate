@@ -10,8 +10,8 @@ const Home = () => {
     >
       {/* Top Logo */}
       <div className="p-8">
-        <h1 className="text-4xl font-extrabold text-white drop-shadow-lg tracking-wide">
-          TripMate
+        <h1 className="text-4xl font-extrabold text-black drop-shadow-lg tracking-wide">
+          TripMate ❃
         </h1>
       </div>
 
